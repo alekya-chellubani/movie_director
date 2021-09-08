@@ -71,7 +71,7 @@ app.put("/movies/:movieId/", async (request, response) => {
   const { movieId } = request.params;
   const details = request.body;
   const { directorId, movieName, leadActor } = details;
-  const putMovieQuery = `UPDATE movie set director_id='${directorId}', movie_name='${movieName}', lead_actor='${leadActor}';`;
+  const putMovieQuery = `UPDATE movie set director_id='${directorId}', movie_name='${movieName}', lead_actor='${leadActor}' WHERE  movie_id=${movieId};`;
   await db.run(putMovieQuery);
   response.send("Movie Details Updated");
 });
@@ -95,14 +95,17 @@ app.get("/directors/", async (request, response) => {
 app.get("/directors/:directorId/movies/", async (request, response) => {
   const { directorId } = request.params;
   console.log(directorId);
-  const getDirectorMovieQuery = `
+  const getDirectorMoviesQuery = `
     SELECT
-     *
+      movie_name
     FROM
-     movie
+      movie
     WHERE
-      director_id = ${directorId};`;
-  const movArray = await db.all(getDirectorMovieQuery);
-  console.log(movArray);
-  response.send(movArray);
+      director_id=${directorId};`;
+  const moviesArray = await db.all(getDirectorMoviesQuery);
+  console.log(moviesArray);
+  response.send(
+    moviesArray.map((eachMovie) => ({ movieName: eachMovie.movie_name }))
+  );
 });
+module.exports = app;
